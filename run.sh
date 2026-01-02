@@ -31,5 +31,7 @@ add_arg lt_key
 add_arg lt_ignore_addr
 add_arg lt_ignore_type
 add_arg lt_ignore_area
+add_arg restart_attempts
+add_arg restart_delay
 
 exec "${ARGS[@]}"

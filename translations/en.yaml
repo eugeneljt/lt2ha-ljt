@@ -41,3 +41,9 @@ configuration:
   lt_ignore_area:
     name: Ignore Areas
     description: List of area names to ignore (e.g., ["Setup"]).
+  restart_attempts:
+    name: Restart Attempts
+    description: The number of times to try re-establishing the lost connection.
+  restart_delay:
+    name: Restart Delay
+    description: The number of seconds to wait before trying to re-establish the lost connection.

@@ -2,11 +2,15 @@ import asyncio
 import logging
 from json import dumps as json_dumps, loads as json_loads
 from sys import stdout
+from time import sleep
 from typing import Any, Callable
 from queue import Queue as ThreadSafeQueue
 
 from paho.mqtt.client import MQTTMessage, MQTTProtocolVersion
-from websockets import ClientConnection as WsClientConnection
+from websockets import (
+    ClientConnection as WsClientConnection,
+    ConnectionClosedError as WsConnectionClosedError,
+)
 
 from .device import LarnitechDevice, LarnitechDeviceRegistry, LarnitechDeviceWrapper, group
 from .mqtt import Mqtt, MqttClient, MqttDiscovery
@@ -119,11 +123,14 @@ class LarnitechMqttBridge:
 
     async def run(self):
         self._mqtt.client.loop_start()
+        _LOGGER.info("MQTT client connected")
 
         status_set_task: asyncio.Task | None = None
 
         try:
             async with self._larnitech.connect() as self._ws:
+                _LOGGER.info("LT connection established")
+
                 await self._ws_send(
                     request="authorize",
                     handler=self._lt_on_auth,
@@ -167,17 +174,54 @@ class LarnitechMqttBridge:
         finally:
             if status_set_task:
                 status_set_task.cancel()
+                _LOGGER.info("Cancelled the LT updates task")
 
             self._mqtt.client.disconnect()
             self._mqtt.client.loop_stop()
+            _LOGGER.info("MQTT client disconnected")
 
-    def run_sync(self):
+    def run_sync(
+        self,
+        restart_attempts: int = 5,
+        # It's better to wait longer on LT (re)start because the system start and
+        # entities readiness are separate topics. The latter takes notably longer.
+        restart_delay: float = 5,
+    ) -> None:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         bridge = loop.create_task(self.run())
 
         try:
-            loop.run_forever()
+            loop.run_until_complete(bridge)
+        except WsConnectionClosedError as lt_connection_error:
+            status = "LT connection lost"
+
+            _LOGGER.info(status)
+
+            if not bridge.cancelled() and not bridge.cancelling():
+                bridge.cancel(status)
+
+            # Error immediately since no reties allowed.
+            if restart_attempts <= 0:
+                raise lt_connection_error
+
+            try:
+                _LOGGER.info(f"Retrying in {restart_delay} seconds")
+                sleep(restart_delay)
+                self.run_sync(
+                    restart_attempts=restart_attempts,
+                    restart_delay=restart_delay,
+                )
+            except Exception as bridge_restart_error:
+                if restart_attempts <= 0:
+                    raise bridge_restart_error
+                else:
+                    restart_attempts -= 1
+                    _LOGGER.info(f"Retry attempt failed, {restart_attempts} left")
+                    self.run_sync(
+                        restart_attempts=restart_attempts,
+                        restart_delay=restart_delay,
+                    )
         except KeyboardInterrupt:
             bridge.cancel()
             _LOGGER.info("Bye 👋🏻")
@@ -376,6 +420,16 @@ def main() -> None:
         nargs="+",
         dest="ignored_areas",
     )
+    parser.add_argument(
+        "--restart-attempts",
+        type=int,
+        default=5,
+    )
+    parser.add_argument(
+        "--restart-delay",
+        type=int,
+        default=5,
+    )
 
     args = parser.parse_args()
     bridge = LarnitechMqttBridge(
@@ -403,7 +457,10 @@ def main() -> None:
         ),
     )
 
-    bridge.run_sync()
+    bridge.run_sync(
+        restart_attempts=args.restart_attempts,
+        restart_delay=args.restart_delay,
+    )
 
 
 if __name__ == "__main__":
