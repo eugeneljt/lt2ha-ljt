@@ -15,6 +15,7 @@ class LarnitechValveHeating(LarnitechDevice):
 
         self.config.pop("state_topic")
         self.config.update({
+            "action_topic": "action",
             "mode_command_topic": "mode",
             "mode_state_topic": "mode",
             "preset_mode_command_topic": "preset",
@@ -46,11 +47,13 @@ class LarnitechValveHeating(LarnitechDevice):
         # properties along it.
         if automation == "always-off" or (self.status["state"] == "off" and len(self.status) == 1):
             values.update({
+                "action_topic": "off",
                 "mode_state_topic": "off",
                 "preset_mode_state_topic": "None",
             })
         elif automation:
             values.update({
+                "action_topic": "idle" if self.status["state"] == "off" else "heating",
                 "mode_state_topic": "heat",
                 "preset_mode_state_topic": self.status["automation"],
             })
