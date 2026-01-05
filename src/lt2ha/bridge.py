@@ -62,7 +62,7 @@ class LarnitechMqttBridge:
             "area": device.area,
             "name": f"{device.area} {device.name}",
             "unique_id": unique_id,
-            "object_id": f"{_PREFIX}_{area_id}_{to_id(device.name)}",
+            "default_entity_id": f"{_PREFIX}_{area_id}_{to_id(device.name)}",
             "device": {
                 "name": "Larnitech",
                 "model": "Metaforsa 3.plus",
