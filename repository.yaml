@@ -1,5 +1,5 @@
 ---
 # https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
-url: https://github.com/eugeneljt/lt2ha-ljt
 name: "Larnitech to Home Assistant Bridge Add-on Repository"
-maintainer: original author: Sergii Bondarenko <sb@firstvector.org>
+url: "https://github.com/eugeneljt/lt2ha-ljt"
+maintainer: "eugeneljt (fork), original author: Sergii Bondarenko"
