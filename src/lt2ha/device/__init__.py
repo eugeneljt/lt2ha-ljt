@@ -79,12 +79,17 @@ def group(
                 to_register.append(device)
 
     for wrapper, devices_groups in groups.items():
-        if len(devices_groups) == 1:
-            for devices_group in devices_groups.values():
-                to_register.append(devices_group)
-        else:
-            for devices_group in devices_groups.values():
+        print(
+            "DEBUG group:",
+            wrapper.__name__,
+            {area: [d.addr for d in ds] for area, ds in devices_groups.items()},
+        )
+
+        for devices_group in devices_groups.values():
+            if len(devices_group) > 1:
                 to_register.append(wrapper(devices_group))
+            else:
+                to_register.extend(devices_group)
 
     return tuple(to_register), tuple(to_ignore)
 
