@@ -40,6 +40,23 @@ class LarnitechMqttBridge:
         self._status_set_queue = ThreadSafeQueue[tuple[str, dict]]()
         self._mqtt.client.on_message = self._notify_lt
 
+    def _cleanup_legacy_sensor_discovery(self, device: LarnitechDevice) -> None:
+        """
+        Remove old retained MQTT discovery config for legacy generic sensors
+        that were later migrated to a more specific entity type.
+        """
+        if device.addr not in self._larnitech.cleanup_legacy_sensor_addrs:
+            return
+
+        addr_id = to_id(device.addr)
+        unique_id = f"{_PREFIX}_{addr_id}"
+        legacy_topic = f"{self._mqtt.discovery.prefix}/sensor/{unique_id}/config"
+
+        _LOGGER.info(
+            f"🧹 MQTT: Removing legacy sensor discovery for {device.addr} -> {legacy_topic}"
+        )
+        self._mqtt.client.publish(legacy_topic, payload="", retain=True)
+        
     def _register_device(self, device: LarnitechDevice) -> None:
         """
         Register a Larnitech device based on its config.
