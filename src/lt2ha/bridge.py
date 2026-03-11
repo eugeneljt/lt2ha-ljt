@@ -66,8 +66,6 @@ class LarnitechMqttBridge:
         unique_id = f"{_PREFIX}_{addr_id}"
         topic_prefix = f"{_PREFIX}/{addr_id}"
 
-        self._cleanup_legacy_sensor_discovery(device)
-
         for key, value in device.config.items():
             if key.endswith("command_topic"):
                 assert isinstance(value, str), key
@@ -91,6 +89,9 @@ class LarnitechMqttBridge:
             },
         })
 
+        # Try to clean up old device related data if needed
+        self._cleanup_legacy_sensor_discovery(device)
+        
         # Tell HA about the new device.
         self._mqtt.client.publish(
             f"{self._mqtt.discovery.prefix}/{device.entity_type}/{unique_id}/config",
