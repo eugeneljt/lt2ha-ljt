@@ -446,6 +446,13 @@ def main() -> None:
         dest="ignored_areas",
     )
     parser.add_argument(
+        "--lt-cleanup-legacy-sensor-addrs",
+        default=[],
+        metavar="DEVICE_ADDR",
+        nargs="+",
+        dest="cleanup_legacy_sensor_addrs",
+    )
+    parser.add_argument(
         "--restart-attempts",
         type=int,
         default=5,
@@ -479,6 +486,7 @@ def main() -> None:
             ignored_addrs=tuple(args.ignored_addrs),
             ignored_types=tuple(args.ignored_types),
             ignored_areas=tuple(args.ignored_areas),
+            cleanup_legacy_sensor_addrs=tuple(args.cleanup_legacy_sensor_addrs),
         ),
     )
 
