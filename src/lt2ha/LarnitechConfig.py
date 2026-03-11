@@ -40,6 +40,13 @@ class LarnitechConfig:
     to HA (case-insensitive).
     """
 
+    cleanup_legacy_sensor_addrs: tuple[str, ...]
+    """ 
+    The list of device addresses for which old MQTT sensor discovery configs 
+    should be removed. 
+    """
+
+
     def __post_init__(self) -> None:
         object.__setattr__(
             self,
