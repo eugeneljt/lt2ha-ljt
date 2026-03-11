@@ -66,6 +66,8 @@ class LarnitechMqttBridge:
         unique_id = f"{_PREFIX}_{addr_id}"
         topic_prefix = f"{_PREFIX}/{addr_id}"
 
+        self._cleanup_legacy_sensor_discovery(device)
+
         for key, value in device.config.items():
             if key.endswith("command_topic"):
                 assert isinstance(value, str), key
