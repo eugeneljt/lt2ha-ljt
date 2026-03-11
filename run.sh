@@ -31,6 +31,7 @@ add_arg lt_key
 add_arg lt_ignore_addr
 add_arg lt_ignore_type
 add_arg lt_ignore_area
+add_arg lt_cleanup_legacy_sensor_addrs
 add_arg restart_attempts
 add_arg restart_delay
 
