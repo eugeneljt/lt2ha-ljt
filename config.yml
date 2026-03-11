@@ -27,6 +27,11 @@ options:
     - com-port
   lt_ignore_area:
     - Setup
+  lt_cleanup_legacy_sensor_addrs:
+    - "15:23"
+    - "15:22"
+    - "15:24"
+    - "15:25"
   restart_attempts: 5
   restart_delay: 5
 schema:
