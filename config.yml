@@ -2,7 +2,7 @@
 url: https://github.com/eugeneljt/lt2ha-ljt
 name: "Larnitech to Home Assistant Bridge"
 slug: "lt2ha"
-version: "1.1.0-ljt.4"
+version: "1.1.0-ljt.5"
 description: "Bridge between Larnitech and Home Assistant using WebSockets and MQTT"
 init: false
 arch:
@@ -52,6 +52,6 @@ schema:
   lt_ignore_area:
     - str?
   lt_cleanup_legacy_sensor_addrs:
-    - str?    
+    - str?
   restart_attempts: "int(0,10)"
   restart_delay: "int(3,20)"
