@@ -1,3 +1,7 @@
+## 1.1.0-ljt.8
+
+- add simple intercom device type as binary_sensor to catch calls
+
 ## 1.1.0-ljt.3
 
 - add door-sensor device type
