@@ -16,12 +16,14 @@ from .LarnitechValve import LarnitechValve
 from .LarnitechValveHeating import LarnitechValveHeating
 
 from .LarnitechDoorSensor import LarnitechDoorSensor
+from .LarnitechIntercom import LarnitechIntercom
 
 
 LIB = {
     "temperature-sensor": LarnitechTemperatureSensor,
     "humidity-sensor": LarnitechHumiditySensor,
     "door-sensor": LarnitechDoorSensor,
+    "intercom": LarnitechIntercom,
     "motion-sensor": LarnitechMotionSensor,
     "leak-sensor": LarnitechLeakSensor,
     "valve-heating": LarnitechValveHeating,
