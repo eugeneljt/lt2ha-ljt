@@ -40,22 +40,42 @@ class LarnitechMqttBridge:
         self._status_set_queue = ThreadSafeQueue[tuple[str, dict]]()
         self._mqtt.client.on_message = self._notify_lt
 
-    def _cleanup_legacy_sensor_discovery(self, device: LarnitechDevice) -> None:
-        """
-        Remove old retained MQTT discovery config for legacy generic sensors
-        that were later migrated to a more specific entity type.
-        """
-        if device.addr not in self._larnitech.cleanup_legacy_sensor_addrs:
-            return
+    def _cleanup_legacy_sensor_discovery(
+       self,
+       device: LarnitechDevice | None = None,
+       addr: str | None = None,
+    ) -> None:
+       """
+       Remove old retained MQTT discovery config for the given device address,
+       regardless of its current LT area, type, or ignore status.
+       """
+       target_addr = addr or (device.addr if device else None)
+       if not target_addr:
+          return
 
-        addr_id = to_id(device.addr)
-        unique_id = f"{_PREFIX}_{addr_id}"
-        legacy_topic = f"{self._mqtt.discovery.prefix}/sensor/{unique_id}/config"
+      if target_addr not in self._larnitech.cleanup_legacy_sensor_addrs:
+         return
 
-        _LOGGER.info(
-            f"🧹 MQTT: Removing legacy sensor discovery for {device.addr} -> {legacy_topic}"
-        )
-        self._mqtt.client.publish(legacy_topic, payload="", retain=True)
+      addr_id = to_id(target_addr)
+      unique_id = f"{_PREFIX}_{addr_id}"
+      prefix = self._mqtt.discovery.prefix
+
+      entity_types = (
+         "sensor",
+         "binary_sensor",
+         "switch",
+         "light",
+         "fan",
+         "climate",
+         "valve",
+      )
+
+       for entity_type in entity_types:
+          topic = f"{prefix}/{entity_type}/{unique_id}/config"
+          _LOGGER.info(
+             f"🧹 MQTT: Removing discovery for {target_addr} -> {topic}",
+          )
+          self._mqtt.client.publish(topic, payload="", retain=True)
         
     def _register_device(self, device: LarnitechDevice) -> None:
         """
@@ -256,38 +276,41 @@ class LarnitechMqttBridge:
             raise RuntimeError()
 
     async def _lt_on_get_devices(
-        self,
-        devices: list[dict],
-        found: int,
-        **_: dict,
+       self,
+       devices: list[dict],
+       found: int,
+       **_: dict,
     ) -> None:
-        to_register, to_ignore = group(
-            items=devices,
-            client=self._larnitech,
-        )
+       to_register, to_ignore = group(
+          items=devices,
+          client=self._larnitech,
+       )
 
-        for device in to_register:
-            self._register_device(device)
+       for addr in self._larnitech.cleanup_legacy_sensor_addrs:
+          self._cleanup_legacy_sensor_discovery(addr=addr)
 
-        for item in to_ignore:
-            _LOGGER.info(f"🚫 LT: Ignoring {item}")
+       for device in to_register:
+          self._register_device(device)
 
-        # Give the devices time to register.
-        await asyncio.sleep(3)
+       for item in to_ignore:
+          _LOGGER.info(f"🚫 LT: Ignoring {item}")
 
-        # Set the initial state.
-        for device in self._devices:
-            self._notify_ha(device)
+       # Give the devices time to register.
+       await asyncio.sleep(3)
 
-        # Some devices in HA may absorb several devices from LT so
-        # the sum of ignored and registered might not match the total.
-        _LOGGER.info(
-            (
-                f"✅ LT: {found} devices: "
-                f"{len(to_ignore)} ignored, "
-                f"{len(self._devices)} registered"
-            ),
-        )
+       # Set the initial state.
+       for device in self._devices:
+          self._notify_ha(device)
+
+       # Some devices in HA may absorb several devices from LT so
+       # the sum of ignored and registered might not match the total.
+       _LOGGER.info(
+          (
+             f"✅ LT: {found} devices: "
+             f"{len(to_ignore)} ignored, "
+             f"{len(self._devices)} registered"
+          ),
+       )
 
     @staticmethod
     async def _lt_on_status_subscribe(
