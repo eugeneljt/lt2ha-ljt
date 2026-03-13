@@ -1,5 +1,6 @@
 from .LarnitechDevice import LarnitechDevice
 
+
 class LarnitechIntercom(LarnitechDevice):
     entity_type = "binary_sensor"
 
@@ -15,7 +16,13 @@ class LarnitechIntercom(LarnitechDevice):
         state = self.status.get("state")
         if not state:
             return {}
+
+        # Larnitech Intercom:
+        # 0 = no call
+        # 1 = answer button pressed
+        # 2 = intercom calls
         is_ringing = int(state[0]) == 2
+
         return {
             "state_topic": "ON" if is_ringing else "OFF",
         }
