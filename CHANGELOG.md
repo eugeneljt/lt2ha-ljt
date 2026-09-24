@@ -1,3 +1,7 @@
+## 1.1.0-ljt.14
+
+- Fix build compatibility with Supervisor 2026.04+
+
 ## 1.1.0-ljt.12
 
 - Fix Larnitech `dimer-lamp` devices being incorrectly exposed as generic sensors instead of lights.
