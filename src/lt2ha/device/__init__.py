@@ -32,6 +32,7 @@ LIB = {
     # It is actually a lamp when it comes to dimmable.
     "lamp": LarnitechToggleable,
     "dimmer-lamp": LarnitechDimmerLamp,
+    "dimer-lamp": LarnitechDimmerLamp,
     "script": LarnitechToggleable,
     "valve": LarnitechValve,
     # Subtypes below.
