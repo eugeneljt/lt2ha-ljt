@@ -1,3 +1,7 @@
+## 1.1.0-ljt.12
+
+- Fix Larnitech `dimer-lamp` devices being incorrectly exposed as generic sensors instead of lights.
+
 ## 1.1.0-ljt.10
 
 - add simple intercom device type as binary_sensor to catch calls
