@@ -1,3 +1,7 @@
+## 1.1.0-ljt.15
+
+- Add Larnitech `light-scheme` support as Home Assistant switches.
+  
 ## 1.1.0-ljt.14
 
 - Fix build compatibility with Supervisor 2026.04+
