@@ -33,6 +33,7 @@ LIB = {
     "lamp": LarnitechToggleable,
     "dimmer-lamp": LarnitechDimmerLamp,
     "dimer-lamp": LarnitechDimmerLamp,
+    "light-scheme": LarnitechToggleable,
     "script": LarnitechToggleable,
     "valve": LarnitechValve,
     # Subtypes below.
